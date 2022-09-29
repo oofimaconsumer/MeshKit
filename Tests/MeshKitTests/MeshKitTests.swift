@@ -8,7 +8,7 @@ final class MeshKitTests: XCTestCase {
             let exp = expectation(description: "Finished")
             Task {
                 let mesh = MeshKit.mesh(
-                    of: .square(of: 5),
+                    ofSize: .square(of: 5),
                     colors: [
                         .red, .red, .red, .red, .red,
                         .red, .orange, .yellow, .orange, .red,

@@ -13,7 +13,7 @@ import simd
 public actor MeshKit {
     
     public static func mesh(
-        of size: MeshSize,
+        ofSize size: MeshSize,
         colors: [SystemColor],
         locationRandomizationRange: ClosedRange<Float> = -0.2...0.2,
         turbulencyRandomizationRange: ClosedRange<Float> = -0.25...0.25
@@ -51,7 +51,7 @@ public actor MeshKit {
     }
 }
 
-fileprivate extension MeshRandomizer {
+public extension MeshRandomizer {
 
     static func pure(colors: [SystemColor]) -> ColorRandomizer {
         return { color, _, x, y, _, height in
