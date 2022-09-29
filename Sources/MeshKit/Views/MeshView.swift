@@ -9,26 +9,36 @@ import Foundation
 import MeshGradient
 import MetalKit
 
-#if canImport(AppKit)
-public typealias Mesh = MeshView
-#else
-public typealias Mesh = MeshView
-#endif
+public extension MeshView {
 
-extension Mesh {
-    public init(colors: MeshGrid<MeshColor>,
-                animatorConfiguration: MeshAnimator.Configuration,
-                grainAlpha: Float = MeshGradientDefaults.grainAlpha,
-                subdivisions: Int = MeshGradientDefaults.subdivisions,
-                colorSpace: CGColorSpace? = nil) {
-        self.init(initialGrid: colors.asControlPoint(), animatorConfiguration: animatorConfiguration, grainAlpha: grainAlpha, subdivisions: subdivisions, colorSpace: colorSpace)
+     init(
+        colors: Grid<MeshColor>,
+        animatorConfiguration: MeshAnimator.Configuration,
+        grainAlpha: Float = .zero,
+        subdivisions: Int,
+        colorSpace: CGColorSpace? = nil
+    ) {
+        self.init(
+            initialGrid: colors.asControlPoint(),
+            animatorConfiguration: animatorConfiguration,
+            grainAlpha: grainAlpha,
+            subdivisions: subdivisions,
+            colorSpace: colorSpace
+        )
     }
 
-    public init(colors: MeshGrid<MeshColor>,
-                grainAlpha: Float = MeshGradientDefaults.grainAlpha,
-                subdivisions: Int = MeshGradientDefaults.subdivisions,
-                colorSpace: CGColorSpace? = nil) {
-        self.init(grid: colors.asControlPoint(), grainAlpha: grainAlpha, subdivisions: subdivisions, colorSpace: colorSpace)
+    init(
+        colors: Grid<MeshColor>,
+        grainAlpha: Float = .zero,
+        subdivisions: Int,
+        colorSpace: CGColorSpace? = nil
+    ) {
+        self.init(
+            grid: colors.asControlPoint(),
+            grainAlpha: grainAlpha,
+            subdivisions: subdivisions,
+            colorSpace: colorSpace
+        )
     }
 }
 

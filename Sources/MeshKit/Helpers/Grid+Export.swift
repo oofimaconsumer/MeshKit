@@ -1,5 +1,5 @@
 //
-//  MeshColorGrid+Export.swift
+//  Grid+Export.swift
 //  
 //
 //  Created by Ethan Lipnik on 8/18/22.
@@ -13,25 +13,32 @@ import GLKit
 import Accelerate
 import UniformTypeIdentifiers
 
-extension MeshColorGrid {
+public extension Grid where Element == MeshColor {
 
     @discardableResult
-    public func export(to url: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".png"),
-                       size: MeshSize = .init(width: 1920, height: 1080),
-                       subdivisions: Int = MeshDefaults.subdivisions,
-                       grainAlpha: Float = MeshDefaults.grainAlpha,
-                       colorSpace: CGColorSpace? = .init(name: CGColorSpace.sRGB),
-                       fileFormat: UTType = .png,
-                       pixelFormat: MTLPixelFormat = .bgra8Unorm) async throws -> URL {
+    func export(
+        to url: URL = FileManager.default.temporaryDirectory,
+        size: MeshSize = .init(width: 1920, height: 1080),
+        subdivisions: Int,
+        grainAlpha: Float = .zero,
+        colorSpace: CGColorSpace? = .init(name: CGColorSpace.sRGB),
+        pixelFormat: MTLPixelFormat = .bgra8Unorm
+    ) async throws -> URL {
+
+        let fileFormat: UTType = .png
+        let fileName = UUID().uuidString + ".png"
+        let fileUrl = url.appendingPathComponent(fileName)
+
         return try await withCheckedThrowingContinuation({ continuation in
             let grid = self.asControlPoint()
-            let dataProvider = MeshGradientState.static(grid: grid)
-                .createDataProvider()
-            let renderer = MetalMeshRenderer(metalKitView: nil,
-                                             meshDataProvider: dataProvider,
-                                             viewportSize: .init(x: Float(size.width), y: Float(size.height)),
-                                             grainAlpha: grainAlpha,
-                                             subdivisions: subdivisions)
+            let dataProvider = MeshGradientState.static(grid: grid).createDataProvider()
+            let renderer = MetalMeshRenderer(
+                metalKitView: nil,
+                meshDataProvider: dataProvider,
+                viewportSize: .init(x: Float(size.width), y: Float(size.height)),
+                grainAlpha: grainAlpha,
+                subdivisions: subdivisions
+            )
 
             var metalLayer: CAMetalLayer? = CAMetalLayer()
             metalLayer?.colorspace = colorSpace
@@ -40,24 +47,25 @@ extension MeshColorGrid {
             metalLayer?.setNeedsDisplay()
             metalLayer?.frame = CGRect(origin: .zero, size: CGSize(width: CGFloat(size.width),
                                                                   height: CGFloat(size.height)))
-            let currentDrwable = metalLayer?.nextDrawable()
+            let currentDrawable = metalLayer?.nextDrawable()
 
             let renderPassDescriptor = MTLRenderPassDescriptor()
-            renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadAction.clear
-            renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreAction.store
+            renderPassDescriptor.colorAttachments[0].loadAction = .clear
+            renderPassDescriptor.colorAttachments[0].storeAction = .store
             renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 1, green: 1, blue: 1, alpha: 0)
-            renderPassDescriptor.colorAttachments[0].texture = currentDrwable?.texture
+            renderPassDescriptor.colorAttachments[0].texture = currentDrawable?.texture
 
-            renderer.draw(pixelFormat: pixelFormat,
-                          renderPassDescriptor: renderPassDescriptor,
-                          currentDrawable: currentDrwable) { texture in
+            renderer.draw(
+                pixelFormat: pixelFormat,
+                renderPassDescriptor: renderPassDescriptor,
+                currentDrawable: currentDrawable
+            ) { texture in
                 if let texture {
-                    texture.writeTexture(url: url, type: fileFormat, colorSpace: colorSpace)
-                    continuation.resume(returning: url)
+                    texture.writeTexture(url: fileUrl, type: fileFormat, colorSpace: colorSpace)
+                    continuation.resume(returning: fileUrl)
                 } else {
                     continuation.resume(throwing: NSError(domain: "Failed to create texture", code: -1))
                 }
-
                 metalLayer?.removeFromSuperlayer()
                 metalLayer = nil
             }
@@ -65,13 +73,7 @@ extension MeshColorGrid {
     }
 }
 
-extension MTLTexture {
-
-    #if os(iOS)
-    typealias XImage = UIImage
-    #elseif os(macOS)
-    typealias XImage = NSImage
-    #endif
+fileprivate extension MTLTexture {
 
     func makeImage(colorSpace: CGColorSpace? = nil) -> CGImage? {
         assert(self.pixelFormat == .bgra8Unorm)
