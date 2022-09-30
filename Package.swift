@@ -20,7 +20,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/EthanLipnik/MeshGradient.git", from: "1.0.8"),
+        .package(url: "https://github.com/oofimaconsumer/MeshGradient", from: "0.1.0"),
     ],
     targets: [
         .target(

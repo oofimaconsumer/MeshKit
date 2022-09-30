@@ -3,10 +3,10 @@
     {
       "identity" : "meshgradient",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/EthanLipnik/MeshGradient.git",
+      "location" : "https://github.com/oofimaconsumer/MeshGradient",
       "state" : {
-        "revision" : "6497aed1898ecc1f24a6ace6537c13bd86221a08",
-        "version" : "1.0.8"
+        "revision" : "0c9eea9889941e41760934f69d0bbb0dc1f0a26d",
+        "version" : "0.1.0"
       }
     }
   ],
